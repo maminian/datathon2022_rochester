@@ -129,4 +129,5 @@ dmypy.json
 .pyre/
 
 # mine
-data/*
+data/*.pdf
+data/*.zip

@@ -39,7 +39,7 @@ for i,(k,v) in enumerate( files.items() ):
         else:
             identifier = chunks[-1]
 
-        print(i,j,k,identifier)
+        #print(i,j,k,identifier)
         tabular.append([identifier, k, os.path.join('data',basename)])
 
 # this dataframe only has case id and filename information.
