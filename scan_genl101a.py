@@ -3,6 +3,7 @@
 # to flexibly... enough? make the same tools useable between 
 # (e.g.) Rochester pdf files, and Williamstown files.
 
+from collections import OrderedDict
 
 # my local scripts
 import stab
@@ -24,24 +25,6 @@ import skimage # for rotating the image by a pre-determined angle.
 import pytesseract # for main OCR step (image to text dataframe)
 
 #################
-
-#
-matchy = {
-    'defendant' :           {'op': parse.defendant, 'value':''},
-    'utt_number' :          {'op': parse.utt_number, 'value':''},
-    'officer' :             {'op': parse.officer, 'value':''},
-    'law' :                 {'op': parse.law, 'value':''},
-    'description' :         {'op': parse.description, 'value':''},
-    'date' :                {'op': parse.null, 'value':''},
-    'time' :                {'op': parse.null, 'value':''},
-    'C/T/V' :               {'op': parse.null, 'value':''},
-    'vehicle_year' :        {'op': parse.null, 'value':''},
-    'vehicle_make' :        {'op': parse.null, 'value':''},
-    'direction_travel' :    {'op': parse.direction, 'value':''},
-    'highway_type/name' :   {'op': parse.highway, 'value':''},
-    'charge_base' :         {'op': parse.charge_base, 'value':''},
-    'officer_narrative' :   {'op': parse.officer_narrative, 'value':''}
-}
 
 
 
@@ -97,7 +80,7 @@ def process_genl101a(df_tess):
 
 
 #########################################################
-TESS_BLACKLIST = ";{}&£~=%¥€@" # characters we want to specifically exclude from the OCR
+TESS_BLACKLIST = ";{}&£~=%¥€@|" # characters we want to specifically exclude from the OCR
 
 DPI = 300
 
@@ -109,7 +92,33 @@ TESS_CONFIG = '-c tessedit_char_blacklist={} \
         --user-words eng.my-words'.format(TESS_BLACKLIST,DPI)
 ###############
 
+###########################################
+# THIS IS A PROTOTYPE WITH ONE FILE...
+# HYPOTHETICAL LOOP STARTS FOLLOWING
+# DEFINITION OF pdfpath.
+
+# would be the input to a function
 pdfpath = stab.df.iloc[20]['filename']
+
+
+#
+matchy = OrderedDict({
+    'defendant' :           {'op': parse.defendant, 'value':''},
+    'utt_number' :          {'op': parse.utt_number, 'value':''},
+    'officer' :             {'op': parse.officer, 'value':''},
+    'law' :                 {'op': parse.law, 'value':''},
+    'description' :         {'op': parse.description, 'value':''},
+    'date' :                {'op': parse.null, 'value':''},
+    'time' :                {'op': parse.null, 'value':''},
+    'C/T/V' :               {'op': parse.null, 'value':''},
+    'vehicle_year' :        {'op': parse.null, 'value':''},
+    'vehicle_make' :        {'op': parse.null, 'value':''},
+    'direction_travel' :    {'op': parse.direction, 'value':''},
+    'highway_type/name' :   {'op': parse.highway, 'value':''},
+    'charge_base' :         {'op': parse.charge_base, 'value':''},
+    'officer_narrative' :   {'op': parse.officer_narrative, 'value':''}
+})
+
 
 pages = pdf2image.convert_from_path(pdfpath,
                               dpi = DPI,
@@ -143,14 +152,19 @@ df_ocr = pytesseract.image_to_data(
 
 text_rows = row_ize(df_ocr['text'].values)
 
+output = []
+
 for k in matchy.keys():
     matchy[k]['value'] = matchy[k]['op'](text_rows)
-    print(k, matchy[k]['value'])
+#    print(k, matchy[k]['value'])
 
 
-############################
+output.append( [pdfpath] + [v['value'] for v in matchy.values()] )
 
-if False:
+# END HYPOTHETICAL LOOP
+#####################################
+
+if True:
     from matplotlib import pyplot
     fig,ax = pyplot.subplots()
     ax.imshow(img, cmap=pyplot.cm.Greys_r)
