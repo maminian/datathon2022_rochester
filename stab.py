@@ -49,3 +49,5 @@ if __name__=="__main__":
     # proof of concept -- often multiple forms per case_id
     for k,(case_id,dfs) in enumerate( df.groupby('case_id') ):
         print('%3i'%k, ', Case: ', '%15s'%case_id, ', Forms: ', list(dfs['form_type']))
+
+
